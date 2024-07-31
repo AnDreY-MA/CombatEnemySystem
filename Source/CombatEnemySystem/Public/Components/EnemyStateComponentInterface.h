@@ -12,9 +12,6 @@ class UEnemyStateComponentInterface : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
 class COMBATENEMYSYSTEM_API IEnemyStateComponentInterface
 {
 	GENERATED_BODY()

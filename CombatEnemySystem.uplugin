@@ -23,10 +23,6 @@
 	],
 	"Plugins": [
 		{
-			"Name": "ModularGameplayActors",
-			"Enabled": true
-		},
-		{
 			"Name": "StateTree",
 			"Enabled": true
 		},

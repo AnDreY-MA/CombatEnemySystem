@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "EnemyControlInterface.generated.h"
 
@@ -20,7 +19,13 @@ class COMBATENEMYSYSTEM_API IEnemyControlInterface
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="EnemyControlInterface")
-	const AActor* GetTargetActor() const;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Enemy Control Interface")
+	AActor* GetTargetActor() const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Enemy Control Interface")
+	const class UEnvQuery* GetQueryAroundTargetLocation() const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Enemy Control Interface")
+	bool CanAttack() const;
 	
 };

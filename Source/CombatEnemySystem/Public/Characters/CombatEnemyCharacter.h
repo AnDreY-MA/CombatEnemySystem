@@ -5,22 +5,22 @@
 #include "CoreMinimal.h"
 #include "AttributeSet.h"
 #include "GameplayEffectTypes.h"
-#include "ModularCharacter.h"
+#include "GameFramework/Character.h"
 #include "CombatEnemyCharacter.generated.h"
 
 
 UCLASS()
-class COMBATENEMYSYSTEM_API ACombatEnemyCharacter : public AModularCharacter
+class COMBATENEMYSYSTEM_API ACombatEnemyCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
+	explicit ACombatEnemyCharacter(const FObjectInitializer& InInitializer = FObjectInitializer::Get());
+	
 	virtual void BeginPlay() override;
 
-	void OnChangeAttribute(const FOnAttributeChangeData& OnAttributeChangeData);
-
-private:
-	UPROPERTY(EditDefaultsOnly, Category="CombatAbilities")
-	FGameplayAttribute CombatAttribute;
+	virtual void PreInitializeComponents() override;
+	
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 };

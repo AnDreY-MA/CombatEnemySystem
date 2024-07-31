@@ -9,22 +9,20 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(ClassGroup=CombatAI, meta=(BlueprintSpawnableComponent))
 class COMBATENEMYSYSTEM_API UCombatEnemyStateComponent : public UStateTreeComponent
 {
 	GENERATED_BODY()
 
 public:
-	explicit UCombatEnemyStateComponent(const FObjectInitializer& InInitializer);
+	explicit UCombatEnemyStateComponent(const FObjectInitializer& InInitializer = FObjectInitializer::Get());
 
 	virtual bool SetContextRequirements(FStateTreeExecutionContext& Context, bool bLogErrors = false) override;
-
-	
+	 
 	void DetectTarget();
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="States|Events", meta=(AllowPrivateAccess=true))
 	FStateTreeEvent DetectEvent;
-
 	
 };
