@@ -6,8 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "CombatManagerComponent.generated.h"
 
-
 class ACombatEnemyController;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeadAllEnemyCharacters);
 
 UCLASS(ClassGroup=(CombatEnemy), meta=(BlueprintSpawnableComponent))
 class COMBATENEMYSYSTEM_API UCombatManagerComponent : public UActorComponent
@@ -17,6 +18,9 @@ class COMBATENEMYSYSTEM_API UCombatManagerComponent : public UActorComponent
 public:
 	explicit UCombatManagerComponent(const FObjectInitializer& InInitializer = FObjectInitializer::Get());
 
+	UPROPERTY(BlueprintAssignable)
+	FOnDeadAllEnemyCharacters OnDeadAllEnemyCharacters;
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -25,14 +29,14 @@ private:
 	bool OnCheckAttackPrepared();
 
 	UFUNCTION()
-	void OnDeadAICharacter(AActor* CharacterActor);
+	void OnDeadEnemyCharacter(AActor* DestroyedActor);
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Combat AI")
 	TSubclassOf<ACombatEnemyController> CombatAIControllerClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	TArray<ACharacter*> AICharacters;
+	TArray<FName> AICharacters;
 	
 	UPROPERTY()
 	bool bAttacking;

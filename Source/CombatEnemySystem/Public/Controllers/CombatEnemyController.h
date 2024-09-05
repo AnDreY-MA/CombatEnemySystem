@@ -14,7 +14,7 @@ class UCombatEnemyStateComponent;
 
 DECLARE_DYNAMIC_DELEGATE_RetVal(bool, FOnPrepareAttack);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDead, AActor*, CharacterActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDead, ACharacter* const , CharacterActor);
 
 UCLASS(ClassGroup="CombatAI", Abstract, Blueprintable)
 class COMBATENEMYSYSTEM_API ACombatEnemyController : public AAIController, public IEnemyControlInterface

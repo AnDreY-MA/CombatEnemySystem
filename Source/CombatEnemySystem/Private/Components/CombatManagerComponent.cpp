@@ -3,7 +3,9 @@
 
 #include "Components/CombatManagerComponent.h"
 
+#include "LogCombatEnemySystem.h"
 #include "Controllers/CombatEnemyController.h"
+#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CombatManagerComponent)
@@ -28,12 +30,13 @@ void UCombatManagerComponent::BeginPlay()
 		if(auto* CombatController{Cast<ACombatEnemyController>(Controller)}; CombatController)
 		{
 			CombatController->OnPrepareAttack.BindDynamic(this, &UCombatManagerComponent::OnCheckAttackPrepared);
-			CombatController->OnDead.AddDynamic(this, &UCombatManagerComponent::OnDeadAICharacter);
 
-			auto* AICharacter{CombatController->GetCharacter()};
-			AICharacters.AddUnique(AICharacter);
+			ACharacter* AICharacter{CombatController->GetCharacter()};
+			AICharacter->OnDestroyed.AddDynamic(this, &UCombatManagerComponent::OnDeadEnemyCharacter);
+			AICharacters.Add(FName(AICharacter->GetName()));
 		}
 	}
+	
 }
 
 bool UCombatManagerComponent::OnCheckAttackPrepared()
@@ -41,6 +44,15 @@ bool UCombatManagerComponent::OnCheckAttackPrepared()
 	return true;
 }
 
-void UCombatManagerComponent::OnDeadAICharacter(AActor* CharacterActor)
+void UCombatManagerComponent::OnDeadEnemyCharacter(AActor* DestroyedActor)
 {
+	UE_LOG(LogCombatEnemySystem, Display, TEXT("%s is dead"), *DestroyedActor->GetName());
+
+	AICharacters.Remove(TArray<FName>::ElementType(DestroyedActor->GetName()));
+	if(AICharacters.IsEmpty() && OnDeadAllEnemyCharacters.IsBound())
+	{
+		UE_LOG(LogCombatEnemySystem, Display, TEXT("All enemies is dead"));
+		OnDeadAllEnemyCharacters.Broadcast();
+	}
+
 }

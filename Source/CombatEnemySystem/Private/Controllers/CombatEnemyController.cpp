@@ -76,15 +76,11 @@ bool ACombatEnemyController::CanAttack_Implementation() const
 
 void ACombatEnemyController::OnChangeHealthAttribute(const FOnAttributeChangeData& OnAttributeChangeData)
 {
-	UE_LOG(LogCombatEnemySystem, Warning, TEXT("Enemy = %f"), OnAttributeChangeData.NewValue);
-
 	if(OnAttributeChangeData.NewValue == 0.0f)
 	{
 		auto* Own {GetPawn()};
-		Own->Destroy();
 		const float DestroyLife = FMath::RandRange(0.01f, 0.5f);
-		Own->SetLifeSpan(DestroyLife);
-		Own = nullptr;
+		Own->Destroy();
 	}
 
 }

@@ -25,7 +25,7 @@ public class CombatEnemySystem : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", "CoreUObject", "Engine", "AIModule", 
+				"Core", "CoreUObject", "Engine", "AIModule", "EnvironmentQueryEditor"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -40,8 +40,7 @@ public class CombatEnemySystem : ModuleRules
 				"StateTreeModule",
 				"GameplayStateTreeModule",
 				"GameplayAbilities",
-				"ModularGameplay",
-				"EnvironmentQueryEditor"
+				"ModularGameplay"
 			}
 			);
 		
