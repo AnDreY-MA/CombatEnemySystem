@@ -17,7 +17,7 @@ bool USTC_CheckCanAttack::TestCondition(FStateTreeExecutionContext& Context) con
 	if(ControllerContext && ControllerContext->Implements<UEnemyControlInterface>())
 	{
 		const bool bResult {IEnemyControlInterface::Execute_CanAttack(ControllerContext.Get())};
-		UE_LOG(LogCombatEnemySystem, Warning, TEXT("Test = %d"), bResult);
+		UE_LOG(LogCombatEnemySystem, Warning, TEXT("Can Attack = %d"), bResult);
 
 		return bReverse ? !bResult : bResult;
 	}

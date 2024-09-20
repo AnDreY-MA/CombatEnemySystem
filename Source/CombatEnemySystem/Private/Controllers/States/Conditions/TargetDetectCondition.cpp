@@ -17,7 +17,7 @@ bool UTargetDetectCondition::TestCondition(FStateTreeExecutionContext& Context) 
 	{
 		const auto* Target {IEnemyControlInterface::Execute_GetTargetActor(ContextController.Get())};
 		const bool bResult {IsValid(Target)};
-		return bReverse ? bResult : !bResult;
+		return bReverse ? !bResult : bResult;
 	}
 	
 	return false;

@@ -3,14 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AttributeSet.h"
-#include "GameplayEffectTypes.h"
 #include "GameFramework/Character.h"
+#include "GenericTeamAgentInterface.h"
 #include "CombatEnemyCharacter.generated.h"
 
 
 UCLASS()
-class COMBATENEMYSYSTEM_API ACombatEnemyCharacter : public ACharacter
+class COMBATENEMYSYSTEM_API ACombatEnemyCharacter : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -22,5 +21,8 @@ public:
 	virtual void PreInitializeComponents() override;
 	
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	virtual FGenericTeamId GetGenericTeamId() const override
+	{ return FGenericTeamId(1); }
 	
 };

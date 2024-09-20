@@ -11,6 +11,7 @@
 #include "CombatEnemyController.generated.h"
 
 class UCombatEnemyStateComponent;
+class UAIPerceptionStimuliSourceComponent;
 
 DECLARE_DYNAMIC_DELEGATE_RetVal(bool, FOnPrepareAttack);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
@@ -40,6 +41,10 @@ public:
 	UPROPERTY()
 	FOnDead OnDead;
 	
+	// IGenericTeamAgentInterface Implementation
+	virtual FGenericTeamId GetGenericTeamId() const override
+	 {return FGenericTeamId(1);}
+	
 	// IEnemyControlInterface Implementation
 	virtual AActor* GetTargetActor_Implementation() const override;
 
@@ -55,11 +60,14 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat", meta=(AllowPrivateAccess="true"))
 	TWeakObjectPtr<AActor> TargetActor;
 
-	UPROPERTY(EditDefaultsOnly, Category="Combat|Ability")
+	UPROPERTY(EditDefaultsOnly, Category="Combat|Ability System")
 	FGameplayAttribute HealthAttribute;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combat|State", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UCombatEnemyStateComponent> CombatStateComponent;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combat|State", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UAIPerceptionStimuliSourceComponent> PerceptionStimuliSource;
 
 	UPROPERTY(EditDefaultsOnly, Category="EQS")
 	TObjectPtr<UEnvQuery> TargetContextQuery;

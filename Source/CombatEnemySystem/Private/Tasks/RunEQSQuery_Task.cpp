@@ -39,7 +39,7 @@ void URunEQSQuery_Task::Activate()
 
 void URunEQSQuery_Task::OnQueryFinished(TSharedPtr<FEnvQueryResult> EnvQueryResult)
 {
-	if (EnvQueryResult->IsSuccsessful() && EnvQueryResult->Items.Num() > 0)
+	if (EnvQueryResult->IsSuccessful() && EnvQueryResult->Items.Num() > 0)
 	{
 		OnSuccess.Broadcast(EnvQueryResult->GetItemAsLocation(0), EnvQueryResult->GetItemAsActor(0));
 	}

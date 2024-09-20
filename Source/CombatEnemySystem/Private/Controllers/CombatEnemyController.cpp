@@ -7,17 +7,21 @@
 #include "LogCombatEnemySystem.h"
 #include "Components/CombatEnemyStateComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
+#include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CombatEnemyController)
 
 
 ACombatEnemyController::ACombatEnemyController(const FObjectInitializer& InObjectInitializer)
-	: Super(InObjectInitializer), TargetActor(nullptr), TargetContextQuery(nullptr)
+	: Super(InObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>("PathFollowingComponent")), TargetActor(nullptr), TargetContextQuery(nullptr)
 {
 	CombatStateComponent = CreateDefaultSubobject<UCombatEnemyStateComponent>("CombatStateComponent");
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ACombatEnemyController::OnPerceptionUpdated);
+
+	PerceptionStimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>("StimuliSourceComponent");
 
 	bStartAILogicOnPossess = true;
 }
@@ -76,21 +80,20 @@ bool ACombatEnemyController::CanAttack_Implementation() const
 
 void ACombatEnemyController::OnChangeHealthAttribute(const FOnAttributeChangeData& OnAttributeChangeData)
 {
+	UE_LOG(LogTemp, Warning, TEXT("DAMAGE"));
 	if(OnAttributeChangeData.NewValue == 0.0f)
 	{
-		auto* Own {GetPawn()};
-		const float DestroyLife = FMath::RandRange(0.01f, 0.5f);
-		Own->Destroy();
+			
 	}
 
 }
 
 void ACombatEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	UE_LOG(LogCombatEnemySystem, Warning, TEXT("DETECT"));
 	if(Actor->GetClass() != GetPawn()->GetClass() && !TargetActor.IsValid())
 	{
-		UE_LOG(LogCombatEnemySystem, Warning, TEXT("DETECTSER %s"), *Actor->GetName());
+		UE_LOG(LogCombatEnemySystem, Display, TEXT("Detect %s by %s"), *Actor->GetName(), *GetPawn()->GetName());
+
 		TargetActor = Actor;
 		CombatStateComponent->DetectTarget();
 	}

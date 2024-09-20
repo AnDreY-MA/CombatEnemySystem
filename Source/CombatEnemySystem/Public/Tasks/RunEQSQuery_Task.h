@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "RunEQSQuery_Task.generated.h"
