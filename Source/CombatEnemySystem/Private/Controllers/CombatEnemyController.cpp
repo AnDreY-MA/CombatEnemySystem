@@ -44,7 +44,7 @@ void ACombatEnemyController::BeginPlay()
 	{
 		AbilityComponent->GetGameplayAttributeValueChangeDelegate(HealthAttribute).AddUObject(this, &ACombatEnemyController::OnChangeHealthAttribute);
 	}
-	
+
 }
 
 void ACombatEnemyController::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -95,7 +95,7 @@ void ACombatEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stim
 		UE_LOG(LogCombatEnemySystem, Display, TEXT("Detect %s by %s"), *Actor->GetName(), *GetPawn()->GetName());
 
 		TargetActor = Actor;
-		CombatStateComponent->DetectTarget();
+		CombatStateComponent->DetectTarget(Actor);
 	}
 
 }

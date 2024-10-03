@@ -5,7 +5,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CombatEnemyStateComponent)
 
-
 UCombatEnemyStateComponent::UCombatEnemyStateComponent(const FObjectInitializer& InInitializer) :
 	Super(InInitializer)
 {
@@ -16,7 +15,16 @@ bool UCombatEnemyStateComponent::SetContextRequirements(FStateTreeExecutionConte
 	return Super::SetContextRequirements(Context, bLogErrors);
 }
 
-void UCombatEnemyStateComponent::DetectTarget()
+void UCombatEnemyStateComponent::DetectTarget(const AActor* InTarget)
 {
 	SendStateTreeEvent(DetectEvent);
+	TargetActor = InTarget;
+
+	GetWorld()->GetTimerManager().SetTimer(DistanceTimer, this, &UCombatEnemyStateComponent::CheckDistanceToTarget, IntervalCheckDistance, true);
+
+}
+
+void UCombatEnemyStateComponent::CheckDistanceToTarget()
+{
+	Distance = GetOwner()->GetDistanceTo(TargetActor.Get());
 }

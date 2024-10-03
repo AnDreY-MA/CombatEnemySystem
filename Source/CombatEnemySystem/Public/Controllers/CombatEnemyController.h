@@ -8,6 +8,7 @@
 #include "GameplayEffectTypes.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "Perception/AIPerceptionTypes.h"
+#include "Components/CombatStateComponentInterface.h"
 #include "CombatEnemyController.generated.h"
 
 class UCombatEnemyStateComponent;
@@ -17,8 +18,8 @@ DECLARE_DYNAMIC_DELEGATE_RetVal(bool, FOnPrepareAttack);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDead, ACharacter* const , CharacterActor);
 
-UCLASS(ClassGroup="CombatAI", Abstract, Blueprintable)
-class COMBATENEMYSYSTEM_API ACombatEnemyController : public AAIController, public IEnemyControlInterface
+UCLASS(ClassGroup = "CombatAI", Abstract, Blueprintable)
+class COMBATENEMYSYSTEM_API ACombatEnemyController : public AAIController, public IEnemyControlInterface, public ICombatStateComponentInterface
 {
 	GENERATED_BODY()
 
@@ -51,6 +52,16 @@ public:
 	virtual const UEnvQuery* GetQueryAroundTargetLocation_Implementation() const override;
 
 	virtual bool CanAttack_Implementation() const override;
+
+	// End
+
+	// ICombatStateComponentInterface Implementation
+	virtual UCombatEnemyStateComponent* GetCombatStateComponent_Implementation() const override 
+	{
+		return CombatStateComponent;
+	}
+
+	// End
 
 private:
 	void OnChangeHealthAttribute(const FOnAttributeChangeData& OnAttributeChangeData);
