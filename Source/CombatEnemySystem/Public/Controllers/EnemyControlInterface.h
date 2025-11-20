@@ -21,12 +21,8 @@ class COMBATENEMYSYSTEM_API IEnemyControlInterface
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Enemy Control Interface")
-	AActor* GetTargetActor() const;
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Enemy Control Interface")
-	const class UEnvQuery* GetQueryAroundTargetLocation() const;
+	const AActor* GetTargetActor() const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Enemy Control Interface")
 	bool CanAttack() const;
-	
 };

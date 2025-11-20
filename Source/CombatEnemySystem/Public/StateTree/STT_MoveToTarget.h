@@ -6,23 +6,21 @@
 #include "Blueprint/StateTreeTaskBlueprintBase.h"
 #include "STT_MoveToTarget.generated.h"
 
-class AAIController;
-/**
- * 
- */
+class ACombatEnemyController;
+
 UCLASS()
 class COMBATENEMYSYSTEM_API USTT_MoveToTarget : public UStateTreeTaskBlueprintBase
 {
 	GENERATED_BODY()
 
 public:
-	explicit USTT_MoveToTarget(const FObjectInitializer& InInitializer = FObjectInitializer::Get());
-	
 	//virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) override;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat System", meta=(AllowPrivateAccess="true"))
-	TObjectPtr<AAIController> ControllerContext;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Context", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<ACombatEnemyController> ControllerContext;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<AActor> Target;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat System", meta=(AllowPrivateAccess="true"))
 	float AcceptanceRadius;

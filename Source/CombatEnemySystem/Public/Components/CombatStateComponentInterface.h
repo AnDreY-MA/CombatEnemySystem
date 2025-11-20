@@ -19,6 +19,6 @@ class COMBATENEMYSYSTEM_API ICombatStateComponentInterface
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Combat StateComponent Interface")
-	class UCombatEnemyStateComponent* GetCombatStateComponent() const;
+	class UCombatEnemyStateComponent* GetCombatStateComponent();
 
 };

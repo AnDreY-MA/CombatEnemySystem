@@ -10,22 +10,25 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(RunEQSQuery_Task)
 
 URunEQSQuery_Task::URunEQSQuery_Task(const FObjectInitializer& InInitializer) :
-	Super(InInitializer), RunMode(EEnvQueryRunMode::SingleResult)
+	Super(InInitializer), QueryConfig(), RunMode(EEnvQueryRunMode::SingleResult)
 {
 }
 
-URunEQSQuery_Task* URunEQSQuery_Task::FindAroundTargetLocation_Task(
-	AAIController* InAIController, UEnvQuery* InEnvironmentQuery, TEnumAsByte<EEnvQueryRunMode::Type> InRunMode)
+URunEQSQuery_Task* URunEQSQuery_Task::RunEQSQuery_Task(
+	UObject* WorldContext, AAIController* InAIController, UEnvQuery* InEnvironmentQuery, const TArray<FAIDynamicParam>& InQueryConfig, TEnumAsByte<EEnvQueryRunMode::Type> InRunMode)
 {
 	if(!InAIController)
 	{
 		return nullptr;
 	}
 	
-	URunEQSQuery_Task* FindTask{NewObject<URunEQSQuery_Task>()};
+	URunEQSQuery_Task* FindTask{NewObject<URunEQSQuery_Task>(InAIController)};
 	FindTask->Controller = InAIController;
 	FindTask->EnvQuery = InEnvironmentQuery;
+	FindTask->QueryConfig = InQueryConfig;
 	FindTask->RunMode = InRunMode;
+	
+	//FindTask->RegisterWithGameInstance(WorldContext);
 	
 	return FindTask;
 }
@@ -33,19 +36,33 @@ URunEQSQuery_Task* URunEQSQuery_Task::FindAroundTargetLocation_Task(
 void URunEQSQuery_Task::Activate()
 {
 	FEnvQueryRequest QueryRequest(EnvQuery.Get(), Controller->GetPawn());
-	QueryRequest.Execute(RunMode, this, &URunEQSQuery_Task::OnQueryFinished);
+
+	for (FAIDynamicParam& Param : QueryConfig)
+	{
+		QueryRequest.SetDynamicParam(Param);
+	}
+
+	RequestId = QueryRequest.Execute(RunMode, this, &URunEQSQuery_Task::OnQueryFinished);
 
 }
 
-void URunEQSQuery_Task::OnQueryFinished(TSharedPtr<FEnvQueryResult> EnvQueryResult)
+void URunEQSQuery_Task::OnQueryFinished(TSharedPtr<FEnvQueryResult> InResult)
 {
-	if (EnvQueryResult->IsSuccessful() && EnvQueryResult->Items.Num() > 0)
+	if (InResult->IsSuccessful() && InResult->Items.Num() > 0)
 	{
-		OnSuccess.Broadcast(EnvQueryResult->GetItemAsLocation(0), EnvQueryResult->GetItemAsActor(0));
+		OnSuccess.Broadcast(InResult->GetItemAsLocation(0), InResult->GetItemAsActor(0));
 	}
 	else
 	{
 		OnFailed.Broadcast(FVector::ZeroVector, nullptr);
 	}
+
+	if (UEnvQueryManager* QueryManager = UEnvQueryManager::GetCurrent(Controller->GetWorld()); QueryManager)
+	{
+		QueryManager->AbortQuery(RequestId);
+	}
+	
+	SetReadyToDestroy();
+
 
 }

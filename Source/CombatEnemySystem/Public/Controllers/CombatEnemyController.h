@@ -3,28 +3,26 @@
 #pragma once
 
 #include "AIController.h"
-#include "AttributeSet.h"
 #include "EnemyControlInterface.h"
-#include "GameplayEffectTypes.h"
-#include "EnvironmentQuery/EnvQuery.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Components/CombatStateComponentInterface.h"
+#include "Data/EnemyDataInterface.h"
+#include "Interfaces/CombatEnemyInterface.h"
+#include "Navigation/CrowdAgentInterface.h"
 #include "CombatEnemyController.generated.h"
 
 class UCombatEnemyStateComponent;
 class UAIPerceptionStimuliSourceComponent;
 
-DECLARE_DYNAMIC_DELEGATE_RetVal(bool, FOnPrepareAttack);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDead, ACharacter* const , CharacterActor);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemyTargetUpdated, AActor*);
 
-UCLASS(ClassGroup = "CombatAI", Abstract, Blueprintable)
-class COMBATENEMYSYSTEM_API ACombatEnemyController : public AAIController, public IEnemyControlInterface, public ICombatStateComponentInterface
+UCLASS(ClassGroup = "CombatAI", Blueprintable)
+class COMBATENEMYSYSTEM_API ACombatEnemyController : public AAIController, public IEnemyControlInterface, public ICombatStateComponentInterface,
+	public IEnemyDataInterface, public ICombatEnemyInterface
 {
 	GENERATED_BODY()
 
 public:
-	
 	explicit ACombatEnemyController(const FObjectInitializer& InObjectInitializer = FObjectInitializer::Get());
 
 	virtual void PreInitializeComponents() override;
@@ -33,57 +31,80 @@ public:
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UPROPERTY()
-	FOnPrepareAttack OnPrepareAttack;
+	FOnEnemyTargetUpdated OnEnemyTargetUpdated;
 
-	UPROPERTY()
-	FOnAttack OnAttack;
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void UpdateTargetActor(AActor* InActor)
+	{
+		TargetActor = InActor;
+		if (OnEnemyTargetUpdated.IsBound())
+		{
+			OnEnemyTargetUpdated.Broadcast(InActor);
+		}
+	}
 
-	UPROPERTY()
-	FOnDead OnDead;
+
+#pragma region Implementation Interfaces
 	
 	// IGenericTeamAgentInterface Implementation
-	virtual FGenericTeamId GetGenericTeamId() const override
-	 {return FGenericTeamId(1);}
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	// IGenericTeamAgentInterface
 	
 	// IEnemyControlInterface Implementation
-	virtual AActor* GetTargetActor_Implementation() const override;
-
-	virtual const UEnvQuery* GetQueryAroundTargetLocation_Implementation() const override;
-
-	virtual bool CanAttack_Implementation() const override;
+	virtual const AActor* GetTargetActor_Implementation() const override;
 
 	// End
 
 	// ICombatStateComponentInterface Implementation
-	virtual UCombatEnemyStateComponent* GetCombatStateComponent_Implementation() const override 
-	{
-		return CombatStateComponent;
-	}
+	virtual UCombatEnemyStateComponent* GetCombatStateComponent_Implementation() override { return CombatStateComponent; }
 
 	// End
 
-private:
-	void OnChangeHealthAttribute(const FOnAttributeChangeData& OnAttributeChangeData);
+	// IEnemyDataInterface Implementation
+	virtual const FEnemyData GetData_Implementation() const override
+	{
+		if (const auto OwnPawn = GetPawn(); OwnPawn && OwnPawn->Implements<UEnemyDataInterface>())
+		{
+			return IEnemyDataInterface::Execute_GetData(OwnPawn);
+		}
+		
+		return FEnemyData();
+	}
+	// End
 
+	// ICombatEnemyInterface Implementation
+	virtual bool CanThrowGrenade_Implementation() const override
+	{
+		if (const auto ControlledPawn = GetPawn(); IsValid(ControlledPawn))
+		{
+			return ICombatEnemyInterface::Execute_CanThrowGrenade(ControlledPawn);
+		}
+		return false;
+	}
+
+	// End ICombatEnemyInterface
+#pragma endregion 
+	
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat", meta=(AllowPrivateAccess="true"))
-	TWeakObjectPtr<AActor> TargetActor;
+	TWeakObjectPtr<const AActor> TargetActor;
 
-	UPROPERTY(EditDefaultsOnly, Category="Combat|Ability System")
-	FGameplayAttribute HealthAttribute;
-
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	FGenericTeamId TeamId;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combat|State", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UCombatEnemyStateComponent> CombatStateComponent;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combat|State", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UAIPerceptionStimuliSourceComponent> PerceptionStimuliSource;
 
-	UPROPERTY(EditDefaultsOnly, Category="EQS")
-	TObjectPtr<UEnvQuery> TargetContextQuery;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|CrowdAvoidance", meta = (AllowPrivateAccess = "true"))
+	bool bEnableDetourCrowdAvoidance{ true };
 
-	UFUNCTION()
-	void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|CrowdAvoidance", meta = (AllowPrivateAccess = "true", EditCondition = "bEnableDetourCrowAvoidance", EditConditionHides, ClampMin = "1", ClampMax = "4"))
+	int32 AvoianceQulity;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|CrowdAvoidance", meta = (AllowPrivateAccess = "true", EditCondition = "bEnableDetourCrowAvoidance", EditConditionHides))
+	float CollisionQueryRange{ 500.f };
+
 };

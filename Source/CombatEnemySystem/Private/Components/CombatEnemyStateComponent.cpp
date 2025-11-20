@@ -3,28 +3,38 @@
 
 #include "Components/CombatEnemyStateComponent.h"
 
+#include "StateTreeExecutionContext.h"
+#include "Components/StateTreeAIComponentSchema.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CombatEnemyStateComponent)
 
 UCombatEnemyStateComponent::UCombatEnemyStateComponent(const FObjectInitializer& InInitializer) :
 	Super(InInitializer)
 {
+	bStartLogicAutomatically = false;
 }
 
-bool UCombatEnemyStateComponent::SetContextRequirements(FStateTreeExecutionContext& Context, bool bLogErrors)
+void UCombatEnemyStateComponent::ReportEnemy()
 {
-	return Super::SetContextRequirements(Context, bLogErrors);
+	SendStateTreeEvent(ReportEvent);
 }
 
-void UCombatEnemyStateComponent::DetectTarget(const AActor* InTarget)
+void UCombatEnemyStateComponent::ReportInstigate()
 {
-	SendStateTreeEvent(DetectEvent);
-	TargetActor = InTarget;
-
-	GetWorld()->GetTimerManager().SetTimer(DistanceTimer, this, &UCombatEnemyStateComponent::CheckDistanceToTarget, IntervalCheckDistance, true);
-
+	SendStateTreeEvent(ReportInstigateEvent);
 }
 
-void UCombatEnemyStateComponent::CheckDistanceToTarget()
+void UCombatEnemyStateComponent::SetupStateTree(UStateTree* InTree, const bool InStart)
 {
-	Distance = GetOwner()->GetDistanceTo(TargetActor.Get());
+	if (!InTree)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("InTree is null, in StateComponent by Controller %s"), *GetOwner()->GetName());
+		return;
+	}
+
+	StateTreeRef.SetStateTree(InTree);
+	if (InStart)
+	{
+		StartLogic();
+	}
 }

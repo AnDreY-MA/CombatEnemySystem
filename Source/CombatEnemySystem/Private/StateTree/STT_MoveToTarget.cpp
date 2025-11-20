@@ -4,13 +4,7 @@
 #include "StateTree/STT_MoveToTarget.h"
 
 #include "AIController.h"
-#include "Controllers/EnemyControlInterface.h"
 #include "Tasks/AITask_MoveTo.h"
-
-USTT_MoveToTarget::USTT_MoveToTarget(const FObjectInitializer& InInitializer) :
-	Super(InInitializer), ControllerContext(nullptr), AcceptanceRadius(100)
-{
-}
 
 /*
 EStateTreeRunStatus USTT_MoveToTarget::EnterState(FStateTreeExecutionContext& Context,

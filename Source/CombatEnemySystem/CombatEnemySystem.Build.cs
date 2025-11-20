@@ -7,23 +7,22 @@ public class CombatEnemySystem : ModuleRules
 	public CombatEnemySystem(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		OptimizeCode = CodeOptimization.Never;
 			
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", "CoreUObject", "Engine", "AIModule"
-			}
+				"Core", "CoreUObject", "Engine", "GameplayTags", "AIModule", "StateTreeModule",
+				"GameplayStateTreeModule", "NavigationSystem", "MotionWarping", "PropertyBindingUtils", "UMG"
+            }
 			);
 			
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				
-				"Slate",
 				"SlateCore",
-				"StateTreeModule",
-				"GameplayStateTreeModule",
 				"GameplayAbilities",
 				"ModularGameplay"
 			}

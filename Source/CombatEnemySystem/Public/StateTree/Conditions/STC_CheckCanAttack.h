@@ -2,29 +2,37 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Blueprint/StateTreeConditionBlueprintBase.h"
+#include "StateTreeConditionBase.h"
 #include "STC_CheckCanAttack.generated.h"
 
 class AAIController;
-/**
- * 
- */
-UCLASS()
-class COMBATENEMYSYSTEM_API USTC_CheckCanAttack : public UStateTreeConditionBlueprintBase
+
+USTRUCT()
+struct FSTC_CanAttackInstanceData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	FGameplayTag LevelAttack = FGameplayTag();
+
+	UPROPERTY(EditAnywhere)
+	bool bReverse{false};
+	
+};
+
+USTRUCT(Category = "Combat AI", meta = (DisplayName = "Can Attack"))
+struct FSTC_CatAttack : public FStateTreeConditionCommonBase
 {
 	GENERATED_BODY()
 
-public:
-	explicit USTC_CheckCanAttack(const FObjectInitializer& Initializer = FObjectInitializer::Get());
-	
+	using FInstanceDataType = FSTC_CanAttackInstanceData;
+
+	virtual const UStruct* GetInstanceDataType() const override
+	{
+		return FInstanceDataType::StaticStruct();
+	}
+
 	virtual bool TestCondition(FStateTreeExecutionContext& Context) const override;
-
-private:
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<AAIController> ControllerContext;
-
-	UPROPERTY(EditAnywhere)
-	bool bReverse;
 	
 };

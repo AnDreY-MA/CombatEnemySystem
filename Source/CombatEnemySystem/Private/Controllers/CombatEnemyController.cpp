@@ -3,7 +3,6 @@
 
 #include "Controllers/CombatEnemyController.h"
 
-#include "AbilitySystemComponent.h"
 #include "LogCombatEnemySystem.h"
 #include "Components/CombatEnemyStateComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
@@ -13,13 +12,11 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CombatEnemyController)
 
-
 ACombatEnemyController::ACombatEnemyController(const FObjectInitializer& InObjectInitializer)
-	: Super(InObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>("PathFollowingComponent")), TargetActor(nullptr), TargetContextQuery(nullptr)
+	: Super(InObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>("PathFollowingComponent")), TargetActor(nullptr)
 {
 	CombatStateComponent = CreateDefaultSubobject<UCombatEnemyStateComponent>("CombatStateComponent");
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
-	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ACombatEnemyController::OnPerceptionUpdated);
 
 	PerceptionStimuliSource = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>("StimuliSourceComponent");
 
@@ -40,9 +37,31 @@ void ACombatEnemyController::BeginPlay()
 
 	Super::BeginPlay();
 
-	if(auto* AbilityComponent{GetPawn()->FindComponentByClass<UAbilitySystemComponent>()}; AbilityComponent)
+	if (auto* CrowdComponent{ Cast<UCrowdFollowingComponent>(GetPathFollowingComponent()) }; CrowdComponent)
 	{
-		AbilityComponent->GetGameplayAttributeValueChangeDelegate(HealthAttribute).AddUObject(this, &ACombatEnemyController::OnChangeHealthAttribute);
+		CrowdComponent->SetCrowdSimulationState(bEnableDetourCrowdAvoidance ? ECrowdSimulationState::Enabled : ECrowdSimulationState::Disabled);
+		
+		switch (AvoianceQulity)
+		{
+		case 1:
+			CrowdComponent->SetCrowdAvoidanceQuality(ECrowdAvoidanceQuality::Low);
+			break;
+		case 2:
+			CrowdComponent->SetCrowdAvoidanceQuality(ECrowdAvoidanceQuality::Medium);
+			break;
+		case 3:
+			CrowdComponent->SetCrowdAvoidanceQuality(ECrowdAvoidanceQuality::Good);
+			break;
+		case 4:
+			CrowdComponent->SetCrowdAvoidanceQuality(ECrowdAvoidanceQuality::High);
+			break;
+		default:
+			break;
+		}
+
+		CrowdComponent->SetAvoidanceGroup(1);
+		CrowdComponent->SetGroupsToAvoid(1);
+		CrowdComponent->SetCrowdCollisionQueryRange(CollisionQueryRange);
 	}
 
 }
@@ -54,48 +73,13 @@ void ACombatEnemyController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-AActor* ACombatEnemyController::GetTargetActor_Implementation() const
+FGenericTeamId ACombatEnemyController::GetGenericTeamId() const
+{
+	return TeamId;
+}
+
+const AActor* ACombatEnemyController::GetTargetActor_Implementation() const
 {
 	return TargetActor.Get();
-}
-
-const UEnvQuery* ACombatEnemyController::GetQueryAroundTargetLocation_Implementation() const
-{
-	return TargetContextQuery.Get();
-	
-}
-
-bool ACombatEnemyController::CanAttack_Implementation() const
-{
-	if(!OnPrepareAttack.IsBound())
-	{
-		UE_LOG(LogCombatEnemySystem, Warning, TEXT("OnPrepareAttack delegate haven't bound"));
-		return false;
-	}
-	
-	const bool bResult = OnPrepareAttack.Execute();
-	return bResult;
-
-}
-
-void ACombatEnemyController::OnChangeHealthAttribute(const FOnAttributeChangeData& OnAttributeChangeData)
-{
-	UE_LOG(LogTemp, Warning, TEXT("DAMAGE"));
-	if(OnAttributeChangeData.NewValue == 0.0f)
-	{
-			
-	}
-
-}
-
-void ACombatEnemyController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
-{
-	if(Actor->GetClass() != GetPawn()->GetClass() && !TargetActor.IsValid())
-	{
-		UE_LOG(LogCombatEnemySystem, Display, TEXT("Detect %s by %s"), *Actor->GetName(), *GetPawn()->GetName());
-
-		TargetActor = Actor;
-		CombatStateComponent->DetectTarget(Actor);
-	}
 
 }

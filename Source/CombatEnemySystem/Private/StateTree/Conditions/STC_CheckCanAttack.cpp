@@ -3,26 +3,22 @@
 
 #include "StateTree/Conditions/STC_CheckCanAttack.h"
 
-#include "AIController.h"
-#include "LogCombatEnemySystem.h"
-#include "Controllers/EnemyControlInterface.h"
+#include "CombatAIFunctionLibrary.h"
+#include "StateTreeExecutionContext.h"
+#include "Components/DirectorCombatAIComponent.h"
 
-USTC_CheckCanAttack::USTC_CheckCanAttack(const FObjectInitializer& Initializer) :
-	Super(Initializer), bReverse(false)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(STC_CheckCanAttack)
+
+
+bool FSTC_CatAttack::TestCondition(FStateTreeExecutionContext& Context) const
 {
-}
+	const auto* DirectorAI {UCombatAIFunctionLibrary::GetDirectorAI(Context.GetOwner()->GetWorld())};
+	if (!DirectorAI) return false;
 
-bool USTC_CheckCanAttack::TestCondition(FStateTreeExecutionContext& Context) const
-{
-	if(ControllerContext && ControllerContext->Implements<UEnemyControlInterface>())
-	{
-		const bool bResult {IEnemyControlInterface::Execute_CanAttack(ControllerContext.Get())};
-		UE_LOG(LogCombatEnemySystem, Warning, TEXT("Can Attack = %d"), bResult);
+	const FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 
-		return bReverse ? !bResult : bResult;
-	}
-	UE_LOG(LogCombatEnemySystem, Warning, TEXT("Warn"));
+	const bool bResult {DirectorAI->IsFreeAttackLevel(InstanceData.LevelAttack)};
 	
-	return Super::TestCondition(Context);
-
+	return InstanceData.bReverse ? !bResult : bResult;
+	
 }
